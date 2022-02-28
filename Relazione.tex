@@ -4,6 +4,7 @@
 \usepackage{float}
 \usepackage{caption}
 \usepackage[italian]{babel}
+\usepackage{verbatim}
 
 \begin{document}
 \captionsetup[table]{name=Figura}
@@ -30,7 +31,7 @@
 
   \begin{center}
     {\LARGE{
-        \textbf{Recurrent SASC}}}
+        \textbf{Simulated Annealing per l'inferenza di mutazioni ricorrenti in alberi tumorali}}}
   \end{center}
 
   \vspace{50mm}
@@ -65,8 +66,34 @@
 
 \chapter{Introduzione}
 
+  Recenti sviluppi riguardanti la terapia mirata per la cura di tumori fanno affidamento su un'accurata inferenza della mutazione clonale e della progressione della malattia.
+  Diversi studi sottolineano come capire l'ordine di accumulazione e la prevalenza delle mutazioni somatiche durante la progressione del tumore può aiutare a progettare meglio queste strategie di trattamento.\\
+  La maggior parte delle tecniche correntemente utilizzate per l'inferenza di progressioni tumorali si basa su dati provenienti da esperimenti di sequenziamento di massa, dove solo una parte delle delle mutazioni osservabili da un grande numero di cellule è ottenuta, senza la distinzione di quali cellule le contengono.
+  Negli ultimi anni sono stati sviluppati molti approcci computazionali per l'analisi di dati di sequenziamenti di massa con lo scopo di inferire la scomposizione di subcloni tumorali e ricostruire la filogenesi dei tumori (alberi evolutivi).\\
+  Il problema principale di questa tecnica è che un campione ottenuto da un sequenziamento di massa contiene un misto sia di cellule sane che di cellule tumorali, e questa mutazione clonale può essere solo stimata dalla porzione di mutazioni osservate.\\
+  Il sequenziamento a singola cellula, o \emph{SCS} (single-cel sequencing), promette di creare la migliore soluzione per capire la causa della progressione del tumore.
+  Tuttavia la mancanza di accuratezza, riflessa nell'alta probabilità di falso positivo e nell'alto drop-out allelico, inerente alla tecnologia usata richiede l'uso di metodi che sono in grado di creare inferenze di progressioni tumorali dai dati prodotti dalle correnti tecniche di \emph{SCS}.\\
+  Vari metodi sono stati recentemente sviluppati con questo scopo, molti di questi metodi però si basano sull'\emph{ISA} (Infinite Site Assumption), il quale essenzialmente indica come una mutazione possa essere acquisita al massimo una volta e mai essere persa. Un motivo per cui questo viene fatto è che questa assunzione semplificativa porta ad un modello evolutivo il cui problema è risolvibile da un algoritmo in tempo polinomiale, ovvero il modello di filogenesi perfetta.\\
+  Questo metodo è sicuro da usare solo in determinate situazioni, come ad esempio l'evoluzione di una popolazione, dove tende ad essere la norma più che un eccezzione. La progressione di cellule tumorali è però invece una situazione piuttosto estrema, dove le cellule sono sotto attacco del sistema immunitario, l'evoluzione è molto veloce e con un'alta probabilità di mutazione.\\
+  Come risultato studi su dati prodotti da SCS stanno cominciando a rilevare fenomeni non spiegabili da un modello di filogenesi perfetta.
+  In questo lavoro utilizziamo quindi un modello Car-($k, r$), il quale è un modello più generale rispetto al modello di filogenesi perfetta, per permmettere la perdita e la ricorrenza di mutazioni.
+  Una volto che però ci allontaniamo dal modello ideale di filogenesi perfetta, privo dalla possibilità di errori, passiamo ad un problema NP-hard.\\
+  In più, la maggior parte dei metodi attualmente disponibili assumono che la probabilità di falso negativo sia la stessa per tutte le mutazioni. Se questa assunzione è valida per dati provenienti da campioni di DNA, la probabilità di falso negativo in campioni provenienti da RNA può variare a causa dei differenti livelli di espressione genetica.
+  Visto che il nostro approccio è pensato per dati provenienti sia da DNA che da RNA i parametri passati possono essere settati per adattarsi a dati provenienti da uno piuttosto che dall'altro, permettendo quindi anche una probabilità di falso negativo diversa per ogni mutazione.\\
+  Partendo dal metodo SASC, un metodo di ricerca di filogenesi che massimizza la likelihood permettendo perdita di mutazioni incorporando il modello di Dollo, abbiamo quindi sviluppato un metodo più generico.
+
+  \section{Motivazioni}
+
+  L'utilizzo di un modello più generico, che comprende anche mutazioni ricorrenti, diventa particolarmente importante quanto si deve descrivere l'evoluzione virale.\\
+  Facendo un esempio molto attuale, il virus SARS-CoV-2, virus che è causa della malattia comunemente chiamata COVID-19, sono state riscontrate 198 mutazioni ricorrenti, la maggior parte delle quali a livello proteico.\\
+  \'E importante lo studio di mutazioni che sono emerse indipendentemente più volte (omoplasia) in quanto sono molto probabilmente adattamenti del virus all'ospite, in questo caso quinid indicano l'adattamento del virus SARS-CoV-2 al genere umano.\\
+  Per descrivere meglio anche questi casi è stato quindi sviluppato il metodo di Simulated Annealing per l'inferenza di mutazioni ricorrenti (o recurrent SASC), il quale permette sia la perdita che la ricorrenza di mutazioni, incorporando un modello Car-($k, r$).
+
+\chapter{Definizioni}
+
 \section{Problemi di ricorstruzione di alberi filogenetici}
-  Prima di cominciare a parlare del recurrent SASC vero e proprio è bene fare una breve introduzione dei concetti che verranno utilizzati.\\
+  Prima di cominciare a parlare del recurrent SASC vero e proprio è bene deinire i concetti che verranno utilizzati.
+
   Un albero filogenetico è un grafico che mostra visivamente la collocazione temporale della separazione fra le linee evolutive che a partire da una data specie ha portato alla formazione di due o più specie diverse attraverso una serie di biforcazioni. Con filogenesi basata su caratteri, dove con carattere si intende una qualunque caratteristica che si può osservare, si intende quella filogenesi che sfrutta alcuni caratteri specifici, un esempio può essere la presenza o meno della colonna vertebrale, per rappresentare la storia evolutiva di alcune specie.
   Utilizzando questo concetto e applicandolo, invece che alla separazione di due linee evolutive dovuta ad una serie di mutazioni, all'acquisizione di una cellula di una determinata mutazione, si può rappresentare l'evoluzione di cellule tumorali.\\
   Come menzionato precedentemente la ricostruzione della progressione evolutiva di cellule tumorali può essere modellato con la costruzione di una filogenesi incompleta basata sui caratteri, dove ogni carattere rappresenta una mutazione.
@@ -94,9 +121,9 @@
   Facciamo inoltre notare come i valori assegnati alle entrate sconosciute della matrice di input non contano nel calcolo della funzione obiettivo, ovvero $P(I_{ij}=\ ?|E_{ij}=1)=P(I_{ij}=\ ?|E_{ij}=0)$. Per semplificare il calcolo della likelihood supponiamo che $P(I_{ij}=\ ?|E_{ij}=1)=P(I_{ij}=\ ?|E_{ij}=0)=1$.
   In più $\sigma$ può essere computato direttamente da $T$, lasciando quindi $T$ come unica variabile da ottimizzare.
 
-\section{Dollo-k e Camil-Socal-k}
+\section{Dollo-k e Camin-Sokal-k}
   La regola di parsinomia di Dollo assume che in filogenesi ogni singola mutazione è introdotta una sola volta nella storia evolutiva, ma che invece perdite della stessa possono occorrere un numero infinito di volte. Una restrizione del modello di Dollo è ottenibile limitando il numero di perdide per ogni mutazione. Chiamiamo quindi Dollo-$k$ il modello evolutivo in cui ogni mutazione può essere acquisita solo una volta e persa al massimo $k$ volte. I casi speciali Dollo-0 e Dollo-1 corrispondono rispettivamente ai modelli di perfetta e persistente filogenesi.\\
-  Invece il modello di Camil-Socal permette molteplici occorrenze della stessa mutazione ma nessuna perdita. Definiamo quindi Camil-Socal-$k$ il modello evolutivo in cui una mutazione può avere al più $k$ ripetizioni e non può mai essere persa. Il caso speciale Camil-Socal-0 corrisponde al modello di filogenesi perfetta.\\
+  Invece il modello di Camin-Sokal permette molteplici occorrenze della stessa mutazione ma nessuna perdita. Definiamo quindi Camin-Sokal-$k$ il modello evolutivo in cui una mutazione può avere al più $k$ ripetizioni e non può mai essere persa. Il caso speciale Camin-Sokal-0 corrisponde al modello di filogenesi perfetta.\\
   Il modello utilizzato in questo lavoro è il Car-($k, r$), un modello che va ad unire i modelli introdotti precedentemente e che quindi ammette al massimo $k$ perdite (o backmutation) e $r$ ripetizioni (o recurrent mutation). Dove i modelli di filogenesi perfetta e filogenesi persistente si ottengono rispettivamente con i casi Car-(0, 0) e Car(1, 0). Il problema di ricorstruzione della filogenesi su un modello Car-($k, r$) è NP-completo per ogni $k$ $>$ 1 e $r$ $>$ 0.\\
   Visto che il modello Carl(l, r) utilizza sia backmutation che recurrent mutation introduciamo due nuovi tipi di nodi nell'albero filogenetico, per esprimere le perdite e le ripetizioni delle mutazioni. Per ogni mutazione $p$ creiamo $k$ nuove mutazioni ${p^-}_{l}$ per ogni $l\in\{i, ..., k\}$, rappresentanti le possibili perdite della mutazione $p$, in più creiamo $r$ nuove mutazioni ${p}_{j}$ per ogni $j\in\{i, ..., r\}$ reppresentanto le possibili copie della mutazione $p$.
   In più imponiamo delle nuove regole: che ogni nodo etichettato da una perdita di una mutazione $p^-$ debba essere discendente di un nodo etichettato dall'acquisizione di una mutazione $p$, e che ogni nodo etichettato da $p$ non possa essere discendente di un'altro nodo etichettato con $p$, a meno che questo non sia prima stato perso con un nodo $p^-$.\\
@@ -141,10 +168,36 @@
   Con $T$ che è una variabile chiamata \emph{temperatura} scelta inizialmente e che continua a diminuire nel tempo dopo un certo numero di mosse non migliorative.\\
   Come si può intuire dalla formula, una temperatura alta indica una più alta probabilità di accettare mosse molto peggiorative, favorendo l'\emph{exploration}, ovvero la ricerca all'interno della funzione per evitare di rimanere incastrati in ottimi locali, invece man mano che la temperatura diminuisce anche la probabilità di accettare mosse molto peggiorative, favorendo quindi l'\emph{exploitation}, ovvero la ricerca dell'ottimo nell'intorno in cui mi trovo, con $T\approx 0$ non accetto più soluzioni peggiorative. Il criterio di arresto dell'algoritmo in genere è l'aver fatto un certo numero di iterazioni con una $T$ minima, scelta inizialmente.
 
-\chapter{World}
+\chapter{Metodo}
+  Si discute ora il metodo col quale si ricostruisce l'albero evolutivo massimizzando la \emph{likelihood}, ovvero il valore che indica la bontà della soluzione trovata. A tal fine sono state fatte diverse aggiunte alla codebase di \textbf{SASC} e quindi è bene, come prima cosa, analizzare le strumentazioni, ovvero il linguaggio di programmazione e le librerie principali, usate nel progetto.
 
-\section{End}
-  End.
+  \section{Introduzione agli strumenti utilizzati}
+  \subsection{Librerie e linguaggio}
+
+  Nel progetto è stato utlizzato come linguaggio \emph{C}, ai fini del progetto non sono stati aggiunti nuovi file sorgenti ma sono state fatte aggiunte e modifiche all'interno della \textit{codebase}.\\
+  Bisogna, quindi, citare una serie di librerie esterne utilizzate in diverse parti del codice C:
+  \begin{itemize}
+    \item La libreria \textbf{vector}, che permette l'implementazione della struttura dati dei \textit{vettori} nel linuaggio \textit{C}
+
+    \item La libreria \textbf{tree}, che permette l'implementazione di alberi evolutivi con nodi etichettati nel linguaggio \textit{C}, rapprentando anche backmutation e recurrent mutation
+
+    \item La libreria \textbf{mt19937ar}, che consente di generare numeri casuali in vari maniere, nello specifico nel progetto viene utilizza per generare numeri casuali all'interno di determinati range o per generare unsigned int a 32-bit casuali
+  \end{itemize}
+
+  \subsection{Graphwiz}
+  \'E un sotware open source per la visualizzazzione di grafi che, data la descrizione di un grafo, ne crea il diagramma in vari formati quali, per esempio pdf o SVG.
+  La descrizione del grafo da creare può essere passata o direttamente nel terminale o attraverso un file con estensione \emph{GV}.
+  I file \emph{GV} contengono descrizioni riguardanti grafi scritte nel lingiaggio \emph{DOT}, il quale è un linguaggio per la rappresentazione di grafi che può essere interpretato da Graphwiz o da altri programmi che lo usano internamente.\\
+  Graphwiz possiede vari opzioni per quanto riguarda il colore e la forma dei nodi ma anche font, stili di archi e in generale altre opzioni per personalizzare l'estetica di un grafo. Il linguaggio DOT è stato utlizzato come output del codice sia per stampare sul terminale gli alberi che per creare un file GV di output contente l'albero migliore.
+
+  \section{Input}
+  Iniziamo quindi a descrivere come funziona il codice di \emph{recurrent SASC} vero e proprio.\\
+  La prima parte riguarda ai dati di input che vengono passati, che ruguardano sia il modello utilizzato, Car-($k, r$), sia la matrice indicante le mutazioni delle varie cellule e in più anche i dati relativi a falso positivo e falso negativo.\\
+  Riguardo al modello Car-($k, r$) vengono passati inanzitutto i valori $k$ e $r$ del modello, i quali indicano rispettivamente il numero massimo di backmutation e di recurrent mutation di ongi mutazione e $d$ e $z$ che sono il numero massimo di backmutation e recurrent mutation presenti nell'intero albero, questi ultimi dati se non vengono passati sono impostati +inf, le probabilità $\gamma$ e $\delta$, che sono le probabilità di aggiungere backmutation e recurrent mutation, le quali possono essere diverse per ogni mutazione (e quindi passate attraverso un file) o le stesse per ogni mutazione dell'albero.\\
+  Per quant riguarda invece la matrice di input invece vengono sia passati $n$ e $m$, numero di cellule e numero di mutazioni, che la matrice vera e propria rappresentata da un file di testo contente 1, 0, i quali indicano rispettivamente la presenza e la non presenza di una mutazione in una certa cellula, e 2, il quale indica che non ci sono abbastanza informazioni sulla presenza/assenza della mutazione in quella cellula (ciò che prima avevamo indicato con ?).\\
+  Possono poi essere passati i dati riguardanti il Simulated Annealing, ovvero la temperatura iniziale e il cooling rate, il quale indica quanto velocemente la temperatura diminuisce nel tempo.
+
+
 
 
 
