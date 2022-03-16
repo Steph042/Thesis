@@ -2,13 +2,17 @@
 \usepackage{graphicx}
 \usepackage{geometry}
 \usepackage{float}
-\usepackage{caption}
+\usepackage{subcaption}
 \usepackage{setspace}
 \usepackage{hyperref}
 \usepackage[italian]{babel}
 \usepackage{verbatim}
 \usepackage{biblatex}
+\usepackage[nottoc]{tocbibind}
+
 \addbibresource{thesis.bib}
+\geometry{a4paper, bottom=5cm, left=4.2cm, right=4.2cm, heightrounded=true, bindingoffset=5mm}
+\flushbottom
 
 \begin{document}
 \captionsetup[table]{name=Figura}
@@ -125,7 +129,7 @@
   Questa è un'alternativa della classica filogenesi basata su caratteri, dove l'albero $T$ è definito come un set di caratteri e dove le foglie non hanno nessuna etichetta e rappresentano specie differenti.\\\\
   Lo \emph{stato} di un nodo $x$ è definito come il set di mutazioni acquisite ma non perse nel percorso dalla radice a $x$. Lo stato di ogni foglia $l$ di $T$ è rappresentato da un vettore binario di lunghezza $m$, chiamato profilo del genotipo, che denotiamo come $D(T, l)$, dove $D{(T, l)}_{j}=1$ se e solo se la foglia $l$ ha la mutazione $j$ e 0 altrimenti.\\\\
   Diciamo che l'albero $T$ \emph{codifica} una matrice $E$ se esiste una mappatura $\sigma$ delle righe (cellule) di $E$ nelle foglie di $T$ tale che $E_{i}=D(T, \sigma)_{i}$ per ogni riga $i$ di $E$, dove ${\sigma}_{i}$ denota l'immagine di una riga $i$ attraverso la mappatura $\sigma$.
-  Detto in maniera meno formale, ${\sigma}_{i}$ è il nodo dell'albero filogenetico corrispondente al nodo a cui la cellula $i$ è attaccato.\\\\
+  Detto in maniera meno formale, ${\sigma}_{i}$ è il nodo dell'albero filogenetico corrispondente al nodo a cui la cellula $i$ è attaccata.\\\\
   Notare come la matrice $E$ è completamente caratterizzata dalla coppia $D(T, \sigma)$.
   Dunque il nostro problema può essere espresso come trovare l'albero $T$ che massimizzi la seguente funzione obiettivo:
   \[
@@ -191,7 +195,7 @@
   Se invece $\Delta Z < 0$ ho comunque una probabilità che venga accetata ed è pari a: $e^{\frac{\Delta Z}{T}}$.
   Con $T$ che è una variabile chiamata \emph{temperatura} scelta inizialmente e che continua a diminuire nel tempo.\\\\
   Il metodo col quale si va diminuire la temperatura determina quanto velocemente raggiungiamo la soluzione finale e con quale complessità computazionale, il metodo utilizzato in questo lavoro è la riduzione geometrica della temperatura per cui vale la formula $T_{i}=(1-cooling\_rate)T_{i-1}$, dove il cooling rate è il tasso di riduzione della temperatura ad ogni passo.\\\\
-  Come si può intuire dalla formula, una temperatura alta indica una più alta probabilità di accettare mosse moltovalore che indica quanto la temperatura diminuisce ad ogni passo peggiorative, favorendo l'\emph{exploration}, ovvero la ricerca all'interno della funzione per evitare di rimanere incastrati in ottimi locali, invece man mano che la temperatura diminuisce anche la probabilità di accettare mosse molto peggiorative, favorendo quindi l'\emph{exploitation}, ovvero la ricerca dell'ottimo nell'intorno in cui mi trovo, con $T\approx 0$ non accetto più soluzioni peggiorative.
+  Come si può intuire dalla formula, una temperatura alta indica una più alta probabilità di accettare mosse molto peggiorative, favorendo l'\emph{exploration}, ovvero la ricerca all'interno della funzione per evitare di rimanere incastrati in ottimi locali, invece man mano che la temperatura diminuisce anche la probabilità di accettare mosse molto peggiorative, favorendo quindi l'\emph{exploitation}, ovvero la ricerca dell'ottimo nell'intorno in cui mi trovo, con $T\approx 0$ non accetto più soluzioni peggiorative.
   Il criterio di arresto dell'algoritmo in genere è il raggiungimento della $T$ minima, scelta inizialmente.
 
 \chapter{Metodo}
@@ -355,10 +359,10 @@
 
     \item il numero totale di backmutation nell'albero sia massimo $d$
 
-    \item il numero totale di recurrent mutation nell'albero sia massimo $z$
+    \item il numero totale di recurrent mutation nell'albero sia massimo $c$
   \end{itemize}
   Nel caso questa funzione trovi uno più nodi speciali, dove con nodo speciale si intende un nodo che sia o backmutation o recurrent mutation, che non fanno rispettare queste regole all'albero, li elimina.\\\\
-  Nello specifico, la mossa che scambia due nodi sceglie due nodi che non siano nulli e che non siano nodi speciali in maniera casuale andando a scambiarli, utilizzando un nodo di appoggio, e poi chiama la funzione che controlla che i nodi così spostati continuino a far valere le regole prima elencate.\\\\
+  Nello specifico, la mossa che scambia due nodi sceglie due nodi, che non siano nulli e che non siano nodi speciali, in maniera casuale andando a scambiarli, utilizzando un nodo di appoggio, e poi chiama la funzione che controlla che i nodi così spostati continuino a far valere le regole prima elencate.\\\\
   La mossa di Prune \& reattach invece prima scegli un nodo in maniera casuale, poi stacca il ramo che iniza da quel nodo e lo attacca ad un altro nodo anchesso scelto casualmente, infine chiama la funzione che controlla che il ramo così spostato rispetti le regole.\\\\
   La mossa che va ad aggiungere un nodo speciale ha il 50\% di probabilità di aggiungere una backmutation e un 50\% di probabilità di aggiungere una recurrent mutation, va a chiamare quindi la funzione che crea una backmutation, aggiungendola all'albero, in un caso e la funzione che che crea una backmutation nell'altro.
   Queste funzioni scelgono in maniera casuale una mutazione di cui creare il nodo speciale e controllano preventivamente la correttezza del nodo che deve essere creato, per questo motivo questa mossa non necessita la chiamata alla funzione che controlla l'albero in quanto aggiungono solo nodi che rispettano le regole.\\\\
@@ -371,13 +375,43 @@
 
   Per testare il codice fatto è stata in pù aggiunta un'implementazione della libreria di test C TAP Harness\cite{C-TAP}. Sono quindi stati creati dei test per controllare la correttezza di tutti gli alberi creati e per fare unit testing sulle funzioni che creano recurrent mutation e backmutation.
 
-\begin{comment}
-  \chapter{Analisi dei tempi}
+\chapter{Analisi dei tempi}
 
-  Abbiamo quindi creato l'implementazione di un modello più generico rispettio al SASC di partenza, è importante però analizzare i tempi di eseguzione per vedere se questo modello non fa esplodere i tempi dell'algoritmo
-\end{comment}
+  Abbiamo quindi creato l'implementazione di un modello più generico rispetto al SASC di partenza, è importante però analizzare i tempi di eseguzione per vedere se questo nuovo modello faccia esplodere i tempi di calcolo.\\\\
+  \'E stato quindi eseguito t-test per vedere se ci fosse una differenza significativa tra le medie dei tempi di SASC e recurrent SASC, utilizzando ovviamente gli stessi campioni.\\\\
+  Con ipotesi nulla e ipotesi alternativa che sono:
+  \begin{itemize}
+    \item ipotesi nulla (H0): non c'è una differenza statisticamente significativa tra le medie dei due gruppi
+    \item ipotesi alternativa (H1): c'è una differenza statisticamente significativa tra le medie dei due gruppi
+  \end{itemize}
+  Utilizzando quindi come matrici di input delle matrici con $n=200$ e $m=50$ e come dati $k=2$ (numero massimo di backmutation per ogni mutazione) e $d=5$ (numero massimo di backmutation in tutto l'albero) per SASC e $k=2$, $d=5$ e $j=2$ (numero massimo di recurrent mutation per ogni mutazione) $c=5$ (numero massimo di recurrent mutation in tutto l'albero) otteniamo un p.value = 0.5764.\\\\
+  Questo valore ci indica come la differenza della media dei tempi non sia statisticamente differente con un livello di singnificatività $\alpha=0.05$, si può quindi dire che per questi valori di $d$ e $c$ non si può rifiutare l'ipotesi nulla H0.\\\\
+  Se però, invece di usare $d=5$ e $c=5$, mettessimo $d$ e $c$ a INT\_MAX, allora il t-test ha un p.value = 0.0003, indicando come, senza dei limiti al numero di recurrent mutation e backmutation, i tempi di recurrent SASC esplodano e sia quindi molto più lento di SASC.\\\\
+  Questa differenza così grande nei tempi a seconda della dimensione di $d$ e $c$ può essere probabilmente attribuita alla complessità nel rispettare e controllare le regole riguardanti i nodi speciali quando si ha un elevato numero di recurrent mutation, ciò rende molto lunghi i tempi della funzione che controlla l'albero dopo ogni mossa del Simulated Annealing.
+
+  \begin{figure}[H]
+    \begin{subfigure}{0.5\textwidth}
+      \includegraphics[scale = 0.4]{img/time1.png}
+      \caption{}
+      \label{img:ista}
+    \end{subfigure}
+    \begin{subfigure}{0.5\textwidth}
+      \includegraphics[scale = 0.4]{img/time2.png}
+      \caption{}
+      \label{img:istb}
+    \end{subfigure}
+    \caption{Istogrammi relativi allo studio del tempo medio  (espresso in \emph{s}) con $d=5$ e $c=5$, nella figura \ref{img:ista}, e del tempo medio (espresso in \emph{s}) con $d$ e $c$ uguali a  INT\_MAX nella figura \ref{img:istb}}
+  \end{figure}
+
+\chapter{Conclusioni}
+
+Per quanto riguarda l'implementazione del recurrent SASC nel linguaggio \textit{C}, si è riusciti a creare un codice che cerchi l'albero che massimizza la likelihood, rispettando le regole di correttezza degli alberi creati ad ogni step, con backmutation e recurrent mutation, come ci si era prefissati.\\\\
+Per quanto concerne invece i tempi di esecuzione del codice, visto che non ci si aspetta dati reali con valori di $d$ e $c$ grandi, ci si può ritenere soddisfatti, nonostante le performance scarse quando questi sono molto alti.\\\\
+\textit{Concludendo si può dire di aver ottenuto i risultati che erano stati prefissati nel progetto formativo e posso, a titolo personale, ritenermi soddisfatto dell’esperienza}.
 
 \singlespacing
+\newpage
+\phantomsection
 \addcontentsline{toc}{chapter}{Bibliografia e sitografia}
 \printbibliography[title={Bibliografia e sitografia}]
 
