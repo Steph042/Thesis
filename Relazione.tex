@@ -58,7 +58,7 @@
     \large{\textit{Matricola 829854}}
   \end{flushright}
 
-  \vspace{15mm}
+  \vspace{40mm}
   \begin{center}
     {\large{\bf Anno Accademico 2020-2021}}
   \end{center}
@@ -96,7 +96,7 @@
 
   \section{Motivazioni}
 
-  L'utilizzo di un modello più generico, che comprende anche mutazioni ricorrenti, diventa particolarmente importante quanto si deve descrivere l'evoluzione virale.\\\\
+  L'utilizzo di un modello più generico, che comprende anche mutazioni ricorrenti, diventa in più particolarmente importante quanto si deve descrivere l'evoluzione virale.\\\\
   Facendo un esempio molto attuale, il virus SARS-CoV-2, virus che è causa della malattia comunemente chiamata COVID-19, sono state riscontrate 198 mutazioni ricorrenti, la maggior parte delle quali hanno portato a cambiamenti a livello proteico\cite{VANDORP2020104351}.
   \'E importante lo studio di mutazioni che sono emerse indipendentemente più volte (omoplasia) in quanto sono molto probabilmente adattamenti del virus all'ospite, in questo caso quindi indicano l'adattamento del virus SARS-CoV-2 al genere umano\cite{VANDORP2020104351}.\\\\
   Per descrivere meglio anche questi casi è stato quindi sviluppato il metodo di Simulated Annealing per l'inferenza di mutazioni ricorrenti (o recurrent SASC), il quale permette sia la perdita che la ricorrenza di mutazioni, incorporando un modello Car-($k, r$).
@@ -106,12 +106,12 @@
 \section{Problemi di ricostruzione di alberi filogenetici}
   Prima di cominciare a parlare del recurrent SASC vero e proprio è bene definire i concetti che verranno utilizzati.\\
 
-  Un albero filogenetico è un grafico che mostra visivamente la collocazione temporale della separazione fra le linee evolutive che a partire da una data specie ha portato alla formazione di due o più specie diverse attraverso una serie di biforcazioni.
+  Un albero filogenetico è un grafico che mostra visivamente la collocazione temporale della separazione fra le linee evolutive che a partire da una data specie ha portato alla formazione di due o più specie diverse attraverso una serie di biforcazioni.\\\\
   Con filogenesi basata su caratteri, dove con carattere si intende una qualunque caratteristica che si può osservare, si intende quella filogenesi che sfrutta alcuni caratteri specifici, un esempio può essere la presenza o meno della colonna vertebrale, per rappresentare la storia evolutiva di alcune specie.\\\\
   Utilizzando questo concetto e applicandolo, invece che alla separazione di due linee evolutive dovuta ad una serie di mutazioni, all'acquisizione di una cellula di una determinata mutazione, si può rappresentare l'evoluzione di cellule tumorali.\\\\
   Come menzionato precedentemente la ricostruzione della progressione evolutiva di cellule tumorali può essere modellato con la costruzione di una filogenesi incompleta basata sui caratteri, dove ogni carattere rappresenta una mutazione.\\\\
-  Consideriamo quindi come input una matrice  ${I}_{ij}$ di dimensioni $n$ x $m$, con $n$ numero delle cellule e $m$ numero delle mutazioni, e dove ${I}_{ij} = 0$ indica che la sequenza $i$ non ha la mutazione $j$, ${I}_{ij} = 1$ indica la presenza della mutazione $j$ nella sequenza $i$ e ? indica che non ci sono abbastanza informazioni sulla presenza/assenza di una mutazione $j$ nella sequenza $i$.
-  Questa incertezza sulla presenza di una mutazione deriva da una insufficiente precisione nel sequenziamento del DNA/RNA.\\\\
+  Consideriamo quindi come input una matrice ${I}_{ij}$ di dimensioni $n$ x $m$, con $n$ numero delle cellule e $m$ numero delle mutazioni, e dove ${I}_{ij} = 0$ indica che la sequenza $i$ non ha la mutazione $j$, ${I}_{ij} = 1$ indica la presenza della mutazione $j$ nella sequenza $i$ e ? indica che non ci sono abbastanza informazioni sulla presenza/assenza di una mutazione $j$ nella sequenza $i$.
+  Questa incertezza sulla presenza o meno di una mutazione deriva da una insufficiente precisione nel sequenziamento del DNA/RNA.\\\\
   Oltre a questo ci sono altri problemi derivanti dal sequenziamento, infatti i valori della matrice di input possono anche contenere falsi positivi e falsi negativi, mentre la probabilità di falso positivo è in genere abbastanza bassa, la probabilità di falso negativo può essere alta e variare da una mutazioni all'altra.\\\\
   Quindi, detta $E_{ij}$ la matrice $n$ x $m$ di output finale, ovvero la matrice binaria senza errori o rumore prodotto dall'algoritmo, allora ${\alpha}_{j}$ indica la probabilità di falso negativo della mutazione $j$, mentre invece $\beta$ indica la probabilità di falso positivo.\\
   Di conseguenza, per ogni valore di ${E}_{ij}$, valgono le seguenti:
@@ -123,17 +123,17 @@
   \]
   Puntiamo quindi a trovare una matrice che massimizzi la likelihood della matrice osservata $I$ sotto la probabilità di falso negativo/positivo e i valori mancanti.\\\\
   Il nostro lavoro contiene in più la perdita di mutazioni e la possibilità di avere più ricorrenze della stessa mutazione, andiamo quindi a definire $P(L(j))={\gamma}_{j}$ come la probabilità di perdità della mutazione $j$ e il set di variabili ${c}_{j}$ per $j=1,...,m$ che denota il numero totale di perdite per la mutazione $j$ nell'albero.
-  Definiamo poi $P(D(j))={\delta}_{j}$ come la probabilità di creare una copia della mutazione $j$ e il set di variabili ${f}_{j}$ per $j=1,...,m$ che denota il numero totale di copie per la mutazione $j$ presenti nell'albero.\\\\
+  Definiamo poi $P(Q(j))={\delta}_{j}$ come la probabilità di creare una copia della mutazione $j$ e il set di variabili ${f}_{j}$ per $j=1,...,m$ che denota il numero totale di copie per la mutazione $j$ presenti nell'albero.\\\\
   Un albero filogenetico $T$ di un set $C$ di $m$ mutazioni e $n$ cellule (affette da queste mutazioni) è definito come un albero con radice i cui nodi interni sono etichettati con le mutazioni di $C$, mentre le foglie sono etichettate dalle cellule.
   \'E importante far notare come l'etichettamento dei nodi deve rispettare alcune restrizioni a seconda del modello evolutivo che stiamo considerando. Per esempio, in una filogenesi perfetta, non possono esistere due nodi con la stessa etichetta.\\\\
   Questa è un'alternativa della classica filogenesi basata su caratteri, dove l'albero $T$ è definito come un set di caratteri e dove le foglie non hanno nessuna etichetta e rappresentano specie differenti.\\\\
   Lo \emph{stato} di un nodo $x$ è definito come il set di mutazioni acquisite ma non perse nel percorso dalla radice a $x$. Lo stato di ogni foglia $l$ di $T$ è rappresentato da un vettore binario di lunghezza $m$, chiamato profilo del genotipo, che denotiamo come $D(T, l)$, dove $D{(T, l)}_{j}=1$ se e solo se la foglia $l$ ha la mutazione $j$ e 0 altrimenti.\\\\
-  Diciamo che l'albero $T$ \emph{codifica} una matrice $E$ se esiste una mappatura $\sigma$ delle righe (cellule) di $E$ nelle foglie di $T$ tale che $E_{i}=D(T, \sigma)_{i}$ per ogni riga $i$ di $E$, dove ${\sigma}_{i}$ denota l'immagine di una riga $i$ attraverso la mappatura $\sigma$.
+  Diciamo che l'albero $T$ \emph{codifica} una matrice $E$ se esiste una mappatura $\sigma$ delle righe (cellule) di $E$ nelle foglie di $T$ tale che $E_{i}=D(T, \sigma_{i})$ per ogni riga $i$ di $E$, dove ${\sigma}_{i}$ denota l'immagine di una riga $i$ attraverso la mappatura $\sigma$.
   Detto in maniera meno formale, ${\sigma}_{i}$ è il nodo dell'albero filogenetico corrispondente al nodo a cui la cellula $i$ è attaccata.\\\\
   Notare come la matrice $E$ è completamente caratterizzata dalla coppia $D(T, \sigma)$.
   Dunque il nostro problema può essere espresso come trovare l'albero $T$ che massimizzi la seguente funzione obiettivo:
   \[
-    \max{\sum_{j}^{m}[-c_{j}\log(1-P(L(j)))-f_{j}\log(1-P(D(j)))+\sum_{i}^{n}\log(P(I_{ij}|D(T, \sigma_{i})_{j}))]}
+    \max{\sum_{j}^{m}[-c_{j}\log(1-P(L(j)))-f_{j}\log(1-P(Q(j)))+\sum_{i}^{n}\log(P(I_{ij}|D(T, \sigma_{i})_{j}))]}
   \]
   Facciamo inoltre notare come i valori assegnati alle entrate sconosciute della matrice di input non contano nel calcolo della funzione obiettivo, ovvero $P(I_{ij}=\ ?|E_{ij}=1)=P(I_{ij}=\ ?|E_{ij}=0)$. Per semplificare il calcolo della likelihood supponiamo che $P(I_{ij}=\ ?|E_{ij}=1)=P(I_{ij}=\ ?|E_{ij}=0)=1$.
   In più $\sigma$ può essere computato direttamente da $T$, lasciando quindi $T$ come unica variabile da ottimizzare.
@@ -194,8 +194,8 @@
   SA è però in grado, rispetto ad altri metodi deterministici, di evitare di rimanere bloccato in ottimi locali in quanto può accettare anche step non migliorativi; nello specifico sia data $X_{c}$, soluzione di partenza dell'algoritmo, calcolo $X_{n}$, punto nell'intorno di $X_{c}$ calcolato da una mossa randomica, se $\Delta Z\geq0$, differenza dei valori della funzione obiettievo nei due punti, allora la nuova soluzione viene accetata e diventa la soluzione di partenza del prossimo step dell'algoritmo.\\\\
   Se invece $\Delta Z < 0$ ho comunque una probabilità che venga accetata ed è pari a: $e^{\frac{\Delta Z}{T}}$.
   Con $T$ che è una variabile chiamata \emph{temperatura} scelta inizialmente e che continua a diminuire nel tempo.\\\\
-  Il metodo col quale si va diminuire la temperatura determina quanto velocemente raggiungiamo la soluzione finale e con quale complessità computazionale, il metodo utilizzato in questo lavoro è la riduzione geometrica della temperatura per cui vale la formula $T_{i}=(1-cooling\_rate)T_{i-1}$, dove il cooling rate è il tasso di riduzione della temperatura ad ogni passo.\\\\
-  Come si può intuire dalla formula, una temperatura alta indica una più alta probabilità di accettare mosse molto peggiorative, favorendo l'\emph{exploration}, ovvero la ricerca all'interno della funzione per evitare di rimanere incastrati in ottimi locali, invece man mano che la temperatura diminuisce anche la probabilità di accettare mosse molto peggiorative, favorendo quindi l'\emph{exploitation}, ovvero la ricerca dell'ottimo nell'intorno in cui mi trovo, con $T\approx 0$ non accetto più soluzioni peggiorative.
+  Come si può intuire dalla formula, una temperatura alta indica una più alta probabilità di accettare mosse molto peggiorative, favorendo l'\emph{exploration}, ovvero la ricerca all'interno della funzione per evitare di rimanere incastrati in ottimi locali, invece man mano che la temperatura diminuisce anche la probabilità di accettare mosse molto peggiorative, favorendo quindi l'\emph{exploitation}, ovvero la ricerca dell'ottimo nell'intorno in cui mi trovo, con $T\approx 0$ non accetto più soluzioni peggiorative.\\\\
+  Il metodo col quale si va diminuire la temperatura determina quanto velocemente raggiungiamo la soluzione finale e con quale complessità computazionale, il metodo utilizzato in questo lavoro è la riduzione geometrica della temperatura per cui vale la formula $T_{i}=(1-cooling\_rate)T_{i-1}$, dove il cooling rate è il tasso di riduzione della temperatura ad ogni passo.
   Il criterio di arresto dell'algoritmo in genere è il raggiungimento della $T$ minima, scelta inizialmente.
 
 \chapter{Metodo}
@@ -378,7 +378,7 @@
 \chapter{Analisi dei tempi}
 
   Abbiamo quindi creato l'implementazione di un modello più generico rispetto al SASC di partenza, è importante però analizzare i tempi di eseguzione per vedere se questo nuovo modello faccia esplodere i tempi di calcolo.\\\\
-  \'E stato quindi eseguito t-test per vedere se ci fosse una differenza significativa tra le medie dei tempi di SASC e recurrent SASC, utilizzando ovviamente gli stessi campioni.\\\\
+  \'E stato quindi eseguito test del \textbf{t-test} per vedere se ci fosse una differenza significativa tra le medie dei tempi di SASC e recurrent SASC, utilizzando ovviamente gli stessi campioni.\\\\
   Con ipotesi nulla e ipotesi alternativa che sono:
   \begin{itemize}
     \item ipotesi nulla (H0): non c'è una differenza statisticamente significativa tra le medie dei due gruppi
